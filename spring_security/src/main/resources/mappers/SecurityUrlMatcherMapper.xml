@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.model.dao.SecurityUrlMatcherMapper">
+	<select id="selectSecurityUrlMatcherMapper" resultType="com.example.demo.model.vo.SecurityUrlMatcher">
+		select
+			b.role_nm authority
+			, c.menu_url url
+			, c.menu_ajax_url ajax_url
+		from
+			nm_role_menu_rl_tb a
+		left join nm_role_tb b on a.role_idx = b.role_idx
+		left join nm_menu_tb c on a.menu_idx = c.menu_idx
+	</select>
+</mapper>

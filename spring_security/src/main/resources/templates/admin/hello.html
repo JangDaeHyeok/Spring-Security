@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko"
+	  xmlns:th="http://www.thymeleaf.org"
+	  xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+<meta charset="utf-8">
+<title>Docker & Kubernetess</title>
+</head>
+<body>
+	<div style="display:flex; align-items:center; justify-content:center;">
+		<img alt="docker" src="/static/img/01_docker-logo.png" style="width:300px;">
+		<img alt="docker" src="/static/img/kubernetes-logo.png" style="width:415px;">
+	</div>
+	<div sec:authorize="isAuthenticated()" style="text-align:center; margin-top:30px; font-size:50px;" th:text="${#authentication.principal.admId} + '님 환영합니다!'"></div>
+	<div style="text-align:center; margin-top:30px; font-size:50px;">Admin</div>
+	<div style="text-align:center; margin-top:30px; font-size:50px;">Docker & Kubernetess</div>
+	<div style="margin-top:20px; text-align:center;">
+		<!-- 인증되지 않은 관리자에게 보임 -->
+		<button sec:authorize="isAnonymous()" type="button" onclick="location.href='/admin/loginView'">로그인</button>
+		<!-- 인증된 관리자에게 보임 -->
+		<button sec:authorize="isAuthenticated()" type="button" onclick="location.href='/admin/logout'">로그아웃</button>
+		<i class="fas fa-hand-middle-finger"></i>
+	</div>
+	
+	<!-- ROLE_ADMIN 권한을 가지고 있다면 보임 -->
+	<div sec:authorize="hasRole('ADMIN')" style="text-align:center; margin-top:30px; font-size:50px;">ROLE_ADMIN 권한이 있습니다.</div>
+	<!-- ROLE_SUB_ADMIN 권한을 가지고 있다면 보임 -->
+	<div sec:authorize="hasRole('SUB_ADMIN')" style="text-align:center; margin-top:30px; font-size:50px;">ROLE_SUB_ADMIN 권한이 있습니다.</div>
+	<!-- ROLE_SUB_ADMIN 권한을 가지고 있다면 보임 -->
+	<div sec:authorize="hasRole('USER')" style="text-align:center; margin-top:30px; font-size:50px;">ROLE_USER 권한이 있습니다.</div>
+	<!-- ROLE_ADMIN 혹은 ROLE_SUB_ADMIN 권한을 가지고 있다면 보임 -->
+	<div sec:authorize="hasAnyRole('ADMIN, SUB_ADMIN')" style="text-align:center; margin-top:30px; font-size:40px;">ROLE_ADMIN 혹은 ROLE_SUB_ADMIN 권한이 있습니다.</div>
+	
+	<br/>
+	<!--인증시 사용된 객체에 대한 정보-->
+	<b>Authenticated DTO:</b>
+	<div sec:authorize="isAuthenticated()" sec:authentication="principal"></div>
+	
+	<br/>
+	<!--인증시 사용된 객체의 Username (ID)-->
+	<b>Authenticated username:</b>
+	<div sec:authorize="isAuthenticated()" sec:authentication="name"></div>
+	
+	<br/>
+	<!--객체의 권한-->
+	<b>Authenticated admin role:</b>
+	<div sec:authorize="isAuthenticated()" sec:authentication="principal.authorities"></div>
+</body>
+</html>

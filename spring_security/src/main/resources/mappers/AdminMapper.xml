@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.model.dao.AdminMapper">
+	<select id="selectAdmin" parameterType="com.example.demo.model.dto.AdminDTO" resultType="com.example.demo.model.dto.AdminDTO">
+		select
+			a.adm_idx
+			, a.adm_id
+			, a.adm_pw
+			, a.reg_dt
+			, a.mod_dt
+			, b.adm_role_rl_idx
+			, b.role_idx
+			, c.role_nm
+		from
+			nm_adm_tb a
+		left join nm_adm_role_rl_tb b on a.adm_idx = b.adm_idx
+		left join nm_role_tb c on b.role_idx = c.role_idx
+	</select>
+	
+	<select id="loadAdminByAdminId" parameterType="String" resultType="com.example.demo.model.dto.AdminDTO">
+		select
+			a.adm_idx
+			, a.adm_id
+			, a.adm_pw
+			, a.reg_dt
+			, a.mod_dt
+			, b.adm_role_rl_idx
+			, b.role_idx
+			, c.role_nm
+		from
+			nm_adm_tb a
+		left join nm_adm_role_rl_tb b on a.adm_idx = b.adm_idx
+		left join nm_role_tb c on b.role_idx = c.role_idx
+		where adm_id = #{adm_id}
+	</select>
+	
+	<select id="loadAdminAuthByAdminId" parameterType="com.example.demo.model.dto.AdminDTO" resultType="com.example.demo.model.dto.AdminDTO">
+		select
+			b.role_idx
+			, c.role_nm
+		from
+			nm_adm_tb a
+		left join nm_adm_role_rl_tb b on a.adm_idx = b.adm_idx
+		left join nm_role_tb c on b.role_idx = c.role_idx
+		where adm_id = #{admId}
+	</select>
+	
+	<insert id="insertAdmin" parameterType="com.example.demo.model.dto.AdminDTO">
+		insert into nm_adm_tb (
+		<trim prefixOverrides=",">
+			<if test="admIdx != null and admIdx != ''">, adm_idx</if>
+			<if test="admId != null and admId != ''">, adm_id</if>
+			<if test="admPw != null and admPw != ''">, adm_pw</if>
+			, reg_dt
+		</trim>
+		) values (
+			<trim prefixOverrides=",">
+				<if test="admIdx != null and admIdx != ''">, #{admIdx}</if>
+				<if test="admId != null and admId != ''">, #{admId}</if>
+				<if test="admPw != null and admPw != ''">, #{admPw}</if>
+				, now()
+			</trim>
+		)
+	</insert>
+</mapper>

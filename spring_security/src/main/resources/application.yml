@@ -1,0 +1,36 @@
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 10
+    driverClassName: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+    ##### MS 내부 개발 서버(테스트)
+    url: jdbc:log4jdbc:mysql://server.msinfotech.co.kr:3306/ms_base?characterEncoding=UTF-8&serverTimezone=UTC
+    username: root
+    password: msit!@#4
+    sql-script-encoding: UTF-8
+    
+  thymeleaf:
+    cache: false
+  mvc:
+    static-path-pattern: /static/**
+    
+  redis:
+    host: "192.168.50.147"
+    port: 6379
+    password: msit
+logging:
+  level:
+    web: info
+    root: info
+    com.example.demo: info
+
+sentry:
+  dsn: https://b886ed5364ea4200acc2d319b1026fa3@o1076522.ingest.sentry.io/6078445
+  traces-sample-rate: 1.0
+  environment: local
+#  environment: staging
+#  environment: production
+#  logging:
+#    minimum-breadcrumb-level: info
+#    minimum-event-level: error
+#    enabled: false

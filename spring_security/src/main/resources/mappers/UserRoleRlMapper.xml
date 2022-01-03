@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.model.dao.UserRoleRlMapper">
+	<insert id="insertUserRoleRl" parameterType="com.example.demo.model.dto.UserRoleRlDTO">
+		insert into nm_usr_role_rl_tb (
+			<trim prefixOverrides=",">
+				<if test="usrRoleRlIdx != null and usrRoleRlIdx != ''">, usr_role_rl_idx</if>
+				<if test="roleIdx != null and roleIdx != ''">, role_idx</if>
+				<if test="usrIdx != null and usrIdx != ''">, usr_idx</if>
+				, reg_dt
+			</trim>
+		) values (
+			<trim prefixOverrides=",">
+				<if test="usrRoleRlIdx != null and usrRoleRlIdx != ''">, #{usrRoleRlIdx}</if>
+				<if test="roleIdx != null and roleIdx != ''">, #{roleIdx}</if>
+				<if test="usrIdx != null and usrIdx != ''">, #{usrIdx}</if>
+					, now()
+			</trim>
+		)
+	</insert>
+</mapper>

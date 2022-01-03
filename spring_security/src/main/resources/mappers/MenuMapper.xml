@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.model.dao.MenuMapper">
+	<select id="selectMenu" parameterType="com.example.demo.model.dto.MenuDTO" resultType="com.example.demo.model.dto.MenuDTO">
+		select
+			menu_idx
+			, menu_nm
+			, menu_url
+			, menu_ajax_url
+		from
+			nm_menu_tb
+	</select>
+</mapper>

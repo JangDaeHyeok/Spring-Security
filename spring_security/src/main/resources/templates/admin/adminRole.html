@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<title>develop</title>
+	<style>
+		.box {display: flex; padding-top:50px; justify-content: center}
+		.box > * {margin:0 10px;}
+		.box select {min-width: 200px;}
+	</style>
+</head>
+<body>
+	<div class="box">
+		<select id="adminList">
+			<option value="0"></option>
+		</select>
+		<select id="roleList">
+			<option value="0"></option>
+		</select>
+		<button type="button" onclick="apply_role();">적용</button>
+	</div>
+	
+	<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+	<script>
+		$(function() {
+			select_admin();
+			select_role();
+		});
+		
+		// 관리자 전체 조회
+		function select_admin() {
+			$.ajax({
+				url:"/admin/admin/mgmt",
+				type : "get",
+				contentType: 'application/json',
+				beforeSend : function(xmlHttpRequest) {
+					xmlHttpRequest.setRequestHeader("AJAX","true");
+				},
+				success: function(data) {
+					var html = '';
+					for(var i = 0; i < data.list.length; i++) {
+						html += '<option value="' + data.list[i].admIdx + '">';
+						html += data.list[i].admId;
+						html += '</option>';
+					}
+					
+					$("#adminList").html(html);
+				},
+				error: function(err) { //서버로부터 응답이 정상적으로 처리되지 못햇을 때 실행
+					alert("문제가 발생하였습니다\n관리자에게 문의하여 주세요.");
+					return false;
+				}
+			});
+		}
+		
+		// 권한 전체 조회
+		function select_role() {
+			$.ajax({
+				url:"/admin/role/mgmt",
+				type : "get",
+				contentType: 'application/json',
+				beforeSend : function(xmlHttpRequest) {
+					xmlHttpRequest.setRequestHeader("AJAX","true");
+				},
+				success: function(data) {
+					var html = '';
+					for(var i = 0; i < data.list.length; i++) {
+						html += '<option value="' + data.list[i].roleIdx + '">';
+						html += data.list[i].roleNm;
+						html += '</option>';
+					}
+					
+					$("#roleList").html(html);
+				},
+				error: function(err) { //서버로부터 응답이 정상적으로 처리되지 못햇을 때 실행
+					alert("문제가 발생하였습니다\n관리자에게 문의하여 주세요.");
+					return false;
+				}
+			});
+		}
+		
+		// 권한 적용
+		function apply_role() {
+			var dataSet = {
+				admIdx : $("#adminList").val()
+				, roleIdx : $("#roleList").val()
+				, roleNm : $("#roleList option:checked").text()
+			};
+			$.ajax({
+				url:"/admin/admin/role/mgmt",
+				type : "patch",
+				data : JSON.stringify(dataSet),
+				dataType : "json",
+				contentType: 'application/json',
+				beforeSend : function(xmlHttpRequest) {
+					xmlHttpRequest.setRequestHeader("AJAX","true");
+				},
+				success: function(data) {
+					alert("권한이 수정되었습니다.");
+				},
+				error: function(err) { //서버로부터 응답이 정상적으로 처리되지 못햇을 때 실행
+					alert("문제가 발생하였습니다\n관리자에게 문의하여 주세요.");
+					return false;
+				}
+			});
+		}
+	</script>
+</body>
+</html>

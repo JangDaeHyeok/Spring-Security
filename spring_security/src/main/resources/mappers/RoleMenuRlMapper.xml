@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.model.dao.RoleMenuRlMapper">
+	<select id="selectRoleMenuRl" parameterType="com.example.demo.model.dto.RoleMenuRlDTO" resultType="com.example.demo.model.dto.RoleMenuRlDTO">
+		select
+			a.role_menu_rl_idx
+			, a.role_idx
+			, a.menu_idx
+			, b.role_nm
+			, c.menu_nm
+			, c.menu_url
+			, c.menu_ajax_url
+		from
+			nm_role_menu_rl_tb a
+		left join nm_role_tb b on a.role_idx = b.role_idx
+		left join nm_menu_tb c on a.menu_idx = c.menu_idx
+		<where>
+			<if test="roleMenuRlIdx != null and roleMenuRlIdx != ''"> and a.role_menu_rl_idx = #{roleMenuRlIdx} </if>
+			<if test="roleIdx != null and roleIdx != ''"> and a.role_idx = #{roleIdx} </if>
+			<if test="menuIdx != null and menuIdx != ''"> and a.menu_idx = #{menuIdx} </if>
+		</where>
+		order by a.reg_dt desc
+	</select>
+	
+	<insert id="insertRoleMenuRl" parameterType="com.example.demo.model.dto.RoleMenuRlDTO">
+		insert into nm_role_menu_rl_tb (
+			<trim prefixOverrides=",">
+				<if test="roleMenuRlIdx != null and roleMenuRlIdx != ''">, role_menu_rl_idx</if>
+				<if test="roleIdx != null and roleIdx != ''">, role_idx</if>
+				<if test="menuIdx != null and menuIdx != ''">, menu_idx</if>
+				, reg_dt
+			</trim>
+		) values (
+			<trim prefixOverrides=",">
+				<if test="roleMenuRlIdx != null and roleMenuRlIdx != ''">, #{roleMenuRlIdx}</if>
+				<if test="roleIdx != null and roleIdx != ''">, #{roleIdx}</if>
+				<if test="menuIdx != null and menuIdx != ''">, #{menuIdx}</if>
+				, now()
+			</trim>
+		)
+	</insert>
+	
+	<update id="updateRoleMenuRlDelete" parameterType="com.example.demo.model.dto.RoleMenuRlDTO">
+		update nm_role_menu_rl_tb SET
+			del_yn = "Y"
+			, mod_dt = now()
+		<where>
+			<if test="roleMenuRlIdx != null and roleMenuRlIdx != ''"> and role_menu_rl_idx = #{roleMenuRlIdx} </if>
+			<if test="roleIdx != null and roleIdx != ''"> and role_idx = #{roleIdx} </if>
+			<if test="menuIdx != null and menuIdx != ''"> and menu_idx = #{menuIdx} </if>
+		</where>
+	</update>
+	
+	<update id="deleteRoleMenuRl" parameterType="com.example.demo.model.dto.RoleMenuRlDTO">
+		delete from nm_role_menu_rl_tb
+		<where>
+			<if test="roleMenuRlIdx != null and roleMenuRlIdx != ''"> and role_menu_rl_idx = #{roleMenuRlIdx} </if>
+			<if test="roleIdx != null and roleIdx != ''"> and role_idx = #{roleIdx} </if>
+			<if test="menuIdx != null and menuIdx != ''"> and menu_idx = #{menuIdx} </if>
+		</where>
+	</update>
+</mapper>

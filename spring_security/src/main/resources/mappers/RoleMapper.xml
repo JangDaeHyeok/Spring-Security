@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.model.dao.RoleMapper">
+	<select id="selectRole" parameterType="com.example.demo.model.dto.RoleDTO" resultType="com.example.demo.model.dto.RoleDTO">
+		select
+			role_idx
+			, parent_role_idx
+			, role_nm
+		from
+			nm_role_tb
+		<where>
+			<if test="roleIdx != null and roleIdx != ''">role_idx = #{roleIdx}</if>
+			<if test="parentRoleIdx != null and parentRoleIdx != ''">parent_role_idx = #{parentRoleIdx}</if>
+			<if test="roleNm != null and roleNm != ''">role_nm = #{roleNm}</if>
+		</where>
+	</select>
+</mapper>

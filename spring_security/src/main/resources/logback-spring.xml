@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%boldMagenta(%d{MM-dd HH:mm:ss}) [%boldYellow(%-5level)] %cyan(%logger{5}.%M) - %msg %n</pattern>
+		</encoder>
+	</appender>
+	
+	<!-- Configure the Sentry appender, overriding the logging threshold to the WARN level -->
+	<appender name="Sentry" class="io.sentry.logback.SentryAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>ERROR</level>
+		</filter>
+	</appender>
+	
+	<logger name="jdbc" level="OFF" />
+	<logger name="jdbc.sqlonly" level="OFF" />
+	<logger name="jdbc.sqltiming" level="OFF" />
+	<logger name="jdbc.audit" level="OFF" />
+	<logger name="jdbc.resultset" level="OFF" />
+	<logger name="jdbc.resultsettable" level="OFF" />
+	<logger name="jdbc.connection" level="OFF" />
+	
+	<root level="INFO">
+		<appender-ref ref="STDOUT" />
+		<appender-ref ref="Sentry" />
+	</root>
+</configuration>

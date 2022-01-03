@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.model.dao.AdminRoleRlMapper">
+	<insert id="insertAdminRoleRl" parameterType="com.example.demo.model.dto.AdminRoleRlDTO">
+		insert into nm_adm_role_rl_tb (
+			<trim prefixOverrides=",">
+				<if test="admRoleRlIdx != null and admRoleRlIdx != ''">, adm_role_rl_idx</if>
+				<if test="roleIdx != null and roleIdx != ''">, role_idx</if>
+				<if test="admIdx != null and admIdx != ''">, adm_idx</if>
+				, reg_dt
+			</trim>
+		) values (
+			<trim prefixOverrides=",">
+				<if test="admRoleRlIdx != null and admRoleRlIdx != ''">, #{admRoleRlIdx}</if>
+				<if test="roleIdx != null and roleIdx != ''">, #{roleIdx}</if>
+				<if test="admIdx != null and admIdx != ''">, #{admIdx}</if>
+				, now()
+			</trim>
+		)
+	</insert>
+	
+	<update id="updateAdminRoleRlByAdmIdx" parameterType="com.example.demo.model.dto.AdminRoleRlDTO">
+		update nm_adm_role_rl_tb set
+		<trim prefixOverrides=",">
+			<if test="roleIdx != null and roleIdx != ''">, role_idx = #{roleIdx}</if>
+			, mod_dt = now()
+		</trim>
+		where adm_idx = #{admIdx}
+	</update>
+</mapper>

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<title>develop</title>
+	<style>
+		.box {display: flex; padding-top:50px;}
+		.box > div {padding:0 20px; width: 20%;}
+		.item {border:1px solid #000; min-height: 200px; max-height: 200px; overflow: auto;}
+	</style>
+</head>
+<body>
+	<div class="box">
+		<div>
+			권한 목록 <br> <br>
+			<div class="item" id="roleList">
+			</div>
+		</div>
+		<div>
+			메뉴 <br> <br>
+			<div>
+				<select id="menuList">
+				</select>
+			</div>
+		</div>
+		<div>
+			<button type="button" onclick="add_menu_rl();">등록</button>
+		</div>
+		<div>
+			사용중인 메뉴 <br> <br>
+			<div class="item" id="authorList">
+			</div>
+		</div>
+		<div>
+			<button type="button" id="addEditBtn" onclick="add_edit_author();">등록</button>
+		</div>
+	</div>
+	
+	<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+	<script>
+		var currRoleIdx = "";
+		
+		$(function() {
+			select_role();
+			select_menu();
+		});
+		
+		// 권한 전체 조회
+		function select_role() {
+			$.ajax({
+				url:"/admin/role/mgmt",
+				type : "get",
+				contentType: 'application/json',
+				beforeSend : function(xmlHttpRequest) {
+					xmlHttpRequest.setRequestHeader("AJAX","true");
+				},
+				success: function(data) {
+					var html = '';
+					for(var i = 0; i < data.list.length; i++) {
+						html += '<div onclick="select_author(\'' + data.list[i].roleIdx + '\')">';
+						html += data.list[i].roleNm;
+						html += '</div>';
+					}
+					
+					$("#roleList").html(html);
+				},
+				error: function(err) { //서버로부터 응답이 정상적으로 처리되지 못햇을 때 실행
+					alert("문제가 발생하였습니다\n관리자에게 문의하여 주세요.");
+					return false;
+				}
+			});
+		}
+		
+		// 메뉴 전체 조회
+		function select_menu() {
+			$.ajax({
+				url:"/admin/menu/mgmt",
+				type : "get",
+				contentType: 'application/json',
+				beforeSend : function(xmlHttpRequest) {
+					xmlHttpRequest.setRequestHeader("AJAX","true");
+				},
+				success: function(data) {
+					var html = '';
+					for(var i = 0; i < data.list.length; i++) {
+						html += '<option value="' + data.list[i].menuIdx + '" data-url="' + data.list[i].menuUrl + '" data-ajaxurl="' + data.list[i].menuAjaxUrl + '">';
+						html += data.list[i].menuNm;
+						html += '</option>';
+					}
+					
+					$("#menuList").html(html);
+				},
+				error: function(err) { //서버로부터 응답이 정상적으로 처리되지 못햇을 때 실행
+					alert("문제가 발생하였습니다\n관리자에게 문의하여 주세요.");
+					return false;
+				}
+			});
+		}
+		
+		// 클릭한 권한이 사용중인 메뉴 출력
+		function select_author(idx) {
+			currRoleIdx = idx;
+			
+			var dataSet = {
+				roleIdx : idx
+			};
+			$.ajax({
+				url:"/admin/author/mgmt",
+				type : "get",
+				data : dataSet,
+				dataType : "json",
+				contentType: 'application/json',
+				beforeSend : function(xmlHttpRequest) {
+					xmlHttpRequest.setRequestHeader("AJAX","true");
+				},
+				success: function(data) {
+					var html = '';
+					for(var i = 0; i < data.list.length; i++) {
+						html += '<div class="author" data-menuidx="' + data.list[i].menuIdx + '" onmousedown="author_click(event, this);" oncontextmenu="return false;">';
+						html += data.list[i].menuNm;
+						html += '<br/>::>' + data.list[i].menuUrl;
+						html += '<br/>::>' + data.list[i].menuAjaxUrl;
+						html += '</div>';
+					}
+					
+					$("#authorList").html(html);
+					$("#addEditBtn").text("수정");
+				},
+				error: function(err) { //서버로부터 응답이 정상적으로 처리되지 못햇을 때 실행
+					alert("문제가 발생하였습니다\n관리자에게 문의하여 주세요.");
+					return false;
+				}
+			});
+		}
+		
+		// 오른쪽 마우스 클릭 시 사용중인 메뉴 삭제
+		function author_click(e, target) {
+			if(e.which == 3) {
+				$(target).remove();
+			}
+			return false;
+		}
+		
+		// 메뉴 select에서 선택된 메뉴를 사용중인 메뉴로 등록
+		function add_menu_rl() {
+			var html = '';
+			
+			html += '<div class="author" data-menuidx="' + $("#menuList").val() + '" onmousedown="author_click(event, this);" oncontextmenu="return false;">';
+			html += $("#menuList option:checked").text();
+			html += '<br/>::>' + $("#menuList option:checked").attr("data-url");
+			html += '<br/>::>' + $("#menuList option:checked").attr("data-ajaxurl");
+			html += '</div>';
+			
+			$("#authorList").append(html);
+		}
+		
+		// 권한 등록/수정
+		function add_edit_author() {
+			var dataSet = {
+				roleIdx : currRoleIdx
+			};
+			
+			var menuIdxList = [];
+			// 메뉴 리스트 가공
+			$(".author").each(function(index, value) {
+				menuIdxList.push($(this).attr("data-menuidx"));
+			});
+			
+			dataSet.menuIdxList = menuIdxList;
+			
+			$.ajax({
+				url:"/admin/author/mgmt",
+				type : "post",
+				data : JSON.stringify(dataSet),
+				dataType : "json",
+				contentType: 'application/json',
+				beforeSend : function(xmlHttpRequest) {
+					xmlHttpRequest.setRequestHeader("AJAX","true");
+				},
+				success: function(data) {
+					select_role();
+					alert("권한이 등록/수정되었습니다.");
+				},
+				error: function(err) { //서버로부터 응답이 정상적으로 처리되지 못햇을 때 실행
+					alert("문제가 발생하였습니다\n관리자에게 문의하여 주세요.");
+					return false;
+				}
+			});
+		}
+	</script>
+</body>
+</html>
