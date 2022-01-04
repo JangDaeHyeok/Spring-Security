@@ -5,13 +5,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.example.demo.model.dto.AdminDTO;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 
 /**
  * @Title       JWT Token Util
@@ -19,10 +25,12 @@ import io.jsonwebtoken.SignatureAlgorithm;
  * @Developer   장대혁
  * @Date        2022-01-04
  * @Description JWT 생성, 조회, 유효성 체크
- * @Warning     sevret 변수를 이용해 토근을 검증하기 때문에 실제 사용 시 별도 처리 필요
+ * @Warning     secret 변수를 이용해 토근을 검증하기 때문에 실제 사용 시 별도 처리 필요
  */
 @Component
-public class JwtTokenUtil {
+public class JwtTokenProvider {
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	
 	private static final String secret = "jangdaehyeok";
 	
 	public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
@@ -44,10 +52,12 @@ public class JwtTokenUtil {
 	}
 	
 	// 토근 만료 여부 체크
+	/*
 	private Boolean isTokenExpired(String token) {
 		final Date expiration = getExpirationDateFromToken(token);
 		return expiration.before(new Date());
 	}
+	*/
 	
 	// 토큰 만료일자 조회
 	public Date getExpirationDateFromToken(String token) {
@@ -77,7 +87,21 @@ public class JwtTokenUtil {
 	
 	// 토근 검증
 	public Boolean validateToken(String token, AdminDTO adminDTO) {
-		final String username = getUsernameFromToken(token);
-		return (username.equals(adminDTO.getAdmId())) && !isTokenExpired(token);
+		try {
+			Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
+			return true;
+		} catch (SignatureException e) {
+			log.error("Invalid JWT signature: {}", e.getMessage());
+		} catch (MalformedJwtException e) {
+			log.error("Invalid JWT token: {}", e.getMessage());
+		} catch (ExpiredJwtException e) {
+			log.error("JWT token is expired: {}", e.getMessage());
+		} catch (UnsupportedJwtException e) {
+			log.error("JWT token is unsupported: {}", e.getMessage());
+		} catch (IllegalArgumentException e) {
+			log.error("JWT claims string is empty: {}", e.getMessage());
+		}
+		
+		return false;
 	}
 }

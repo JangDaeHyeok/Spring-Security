@@ -35,6 +35,7 @@ import com.example.demo.security.provider.AdminCustomAuthenticationProvider;
 @Order(1)
 public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	
 	@Autowired private BCryptPasswordEncoder passwordEncoder;
 	// @Autowired private WebAccessDeniedHandler webAccessDeniedHandler;
 	// @Autowired private WebAuthenticationEntryPoint webAuthenticationEntryPoint;
