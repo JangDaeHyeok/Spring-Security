@@ -5,10 +5,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.model.dao.AdminMapper;
@@ -19,6 +22,10 @@ import com.example.demo.security.exception.AdminNotFoundException;
 
 @Service
 public class AdminService {
+	private final Logger log = LoggerFactory.getLogger(this.getClass());
+	
+	private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+	
 	@Autowired AdminMapper adminMapper;
 	@Autowired RoleMapper roleMapper;
 	
@@ -39,6 +46,33 @@ public class AdminService {
 			// admin이 가지고있는 모든 권한 등록
 			aDTO.setAuthorities(loadAdminAuthArrayByAdminId(aDTO.getAdmId()));
 		}
+		
+		return aDTO;
+	}
+	
+	// JWT adminId, password로 정보 조회
+	public AdminDTO loadAdminByAdminId(String adminId, String pw) throws Exception {
+		AdminDTO aDTO = adminMapper.loadAdminByAdminId(adminId).get(0);
+		
+		log.info("*********************************************************************");
+		log.info("[AdminCustomAuthenticationProvider] Spring Security 관리자 정보 인증(Authentication) 조회");
+		
+		log.info("adminId : " + adminId);
+		
+		
+		// 비밀번호가 일치하는지 확인
+		log.info("[AdminCustomAuthenticationProvider] BCryptPasswordEncoder 비밀번호 일치 여부 체크");
+		log.info("입력한 비밀번호 : " + pw);
+		log.info("관리자 비밀번호 : " + aDTO.getAdmPw());
+		
+		if (!passwordEncoder.matches(pw, aDTO.getAdmPw())) {
+			log.info("[AdminCustomAuthenticationProvider] **비밀번호 불일치 Exception**");
+			log.info("*********************************************************************");
+			throw new BadCredentialsException(aDTO.getAdmId() + " Invalid password");
+		}
+		
+		log.info("[AdminCustomAuthenticationProvider] 관리자 인증(Authentication) 성공!!");
+		log.info("*********************************************************************");
 		
 		return aDTO;
 	}
