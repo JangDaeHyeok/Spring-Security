@@ -30,7 +30,7 @@ public class TestAdminAdminController {
 		List<AdminDTO> list = adminService.getAdmin(new AdminDTO());
 		
 		returnMap.put("list", list);
-		returnMap.put("msg", "회원가입 성공");		
+		returnMap.put("msg", "회원가입 성공");
 		return returnMap;
 	}
 }
