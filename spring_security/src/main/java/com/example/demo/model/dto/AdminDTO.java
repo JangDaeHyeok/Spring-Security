@@ -20,5 +20,8 @@ public class AdminDTO implements Serializable{
 	private String parentRoleIdx           = null;
 	private String roleNm                  = null;
 	
+	// jwt token
+	private String token                   = null;
+	
 	Collection<? extends GrantedAuthority> authorities;
 }
