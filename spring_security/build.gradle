@@ -64,10 +64,10 @@ dependencies {
 	runtimeOnly 'mysql:mysql-connector-java'
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.springframework.session:spring-session-data-redis'
-	
-	// Sentry
-	implementation 'io.sentry:sentry-logback:5.4.1'
 	implementation 'io.sentry:sentry-spring-boot-starter:5.4.1'
+	
+	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt
+	implementation group: 'io.jsonwebtoken', name: 'jjwt', version: '0.9.1'
 	
 	compile fileTree(dir: 'libs', include: ['*.jar'])
 }

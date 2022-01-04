@@ -25,7 +25,7 @@ import com.example.demo.security.provider.UsrCustomAuthenticationProvider;
  * @Author      장대혁
  * @Developer   장대혁
  * @Date        2021-11-11
- * @Description Spring Security 사용자 세부 설정
+ * @Description Spring Security 사용자 세부 설정(session, jwt)
  */
 @Configuration
 @EnableWebSecurity

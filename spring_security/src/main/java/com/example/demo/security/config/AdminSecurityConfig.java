@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -26,7 +27,7 @@ import com.example.demo.security.provider.AdminCustomAuthenticationProvider;
  * @Author      장대혁
  * @Developer   장대혁
  * @Date        2021-11-11
- * @Description Spring Security 관리자 세부 설정
+ * @Description Spring Security 관리자 세부 설정(session, jwt)
  */
 @Configuration
 @EnableWebSecurity
@@ -48,12 +49,9 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
 		log.error("*********************************************************************");
 		log.error("[WebSecurityConfig] Spring Security 설정");
 		
+		/*
+		 * session 사용 시
 		http.csrf().disable().antMatcher("/admin/**").authorizeRequests()
-			/*
-			.antMatchers("/**").authenticated()
-			.antMatchers("/**").annonymous()
-			 */
-			
 			// 리로스 항목 제외
 			.antMatchers("/static/**").permitAll()
 			.antMatchers("/favicon.ico").permitAll()
@@ -65,12 +63,6 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
 			.antMatchers("/admin/loginView").permitAll()
 			.antMatchers("/admin/login").permitAll()
 			.anyRequest().access("@authorizationChecker.check(request, authentication)")
-			/*
-			.antMatchers("/admin").hasRole("ADMIN")
-			.antMatchers("/admin/**").hasRole("ADMIN")
-			.anyRequest()
-			.authenticated()
-			 */
 			.and()
 			
 			// exception 처리
@@ -99,6 +91,31 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
 			.deleteCookies("JSESSIONID")
 			.and()
 		.addFilterBefore(adminCustomAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+		*/
+		
+		/*
+		 * jwt 사용 시
+		 */
+		http.csrf().disable().authorizeRequests()
+		// 리로스 항목 제외
+		.antMatchers("/static/**").permitAll()
+		.antMatchers("/favicon.ico").permitAll()
+		
+		// 관리자 권한 항목
+		.antMatchers("/admin").permitAll()
+		.antMatchers("/admin/join").permitAll()
+		.antMatchers("/admin/join/**").permitAll()
+		.antMatchers("/admin/loginView").permitAll()
+		.antMatchers("/admin/login").permitAll()
+		.anyRequest().authenticated()
+		// jwt가 없는 경우 exception handler 설정
+		.and()
+		.exceptionHandling()
+		.authenticationEntryPoint(null)
+		// Spring Security에서 session을 생성하거나 사용하지 않도록 설정
+		.and()
+		.sessionManagement()
+		.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 		
 		log.error("[WebSecurityConfig] Spring Security 설정 완료");
 		log.error("*********************************************************************");
