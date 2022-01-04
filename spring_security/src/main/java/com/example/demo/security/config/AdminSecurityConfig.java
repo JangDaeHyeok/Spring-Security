@@ -19,7 +19,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.example.demo.security.filter.AdminCustomAuthenticationFilter;
 import com.example.demo.security.handler.AdminCustomLoginFailHandler;
 import com.example.demo.security.handler.AdminCustomLoginSuccessHandler;
-import com.example.demo.security.handler.WebAccessDeniedHandler;
+import com.example.demo.security.handler.JwtAuthenticationEntryPoint;
+import com.example.demo.security.jwt.JwtRequestFilter;
 import com.example.demo.security.provider.AdminCustomAuthenticationProvider;
 
 /**
@@ -35,8 +36,11 @@ import com.example.demo.security.provider.AdminCustomAuthenticationProvider;
 public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	@Autowired private BCryptPasswordEncoder passwordEncoder;
-	@Autowired private WebAccessDeniedHandler webAccessDeniedHandler;
+	// @Autowired private WebAccessDeniedHandler webAccessDeniedHandler;
 	// @Autowired private WebAuthenticationEntryPoint webAuthenticationEntryPoint;
+	
+	@Autowired private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+	@Autowired private JwtRequestFilter jwtRequestFilter;
 	
 	// 정적 자원에 대해서는 Security 설정을 적용하지 않음
 	@Override
@@ -93,9 +97,7 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
 		.addFilterBefore(adminCustomAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 		*/
 		
-		/*
-		 * jwt 사용 시
-		 */
+		// jwt 사용을 위한 세션 비활성화
 		http.csrf().disable().authorizeRequests()
 		// 리로스 항목 제외
 		.antMatchers("/static/**").permitAll()
@@ -103,6 +105,7 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
 		
 		// 관리자 권한 항목
 		.antMatchers("/admin").permitAll()
+		.antMatchers("/admin/authentication").permitAll()
 		.antMatchers("/admin/join").permitAll()
 		.antMatchers("/admin/join/**").permitAll()
 		.antMatchers("/admin/loginView").permitAll()
@@ -111,11 +114,14 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
 		// jwt가 없는 경우 exception handler 설정
 		.and()
 		.exceptionHandling()
-		.authenticationEntryPoint(null)
+		.authenticationEntryPoint(jwtAuthenticationEntryPoint)
 		// Spring Security에서 session을 생성하거나 사용하지 않도록 설정
 		.and()
 		.sessionManagement()
 		.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+		
+		// jwt filter 적용
+		http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 		
 		log.error("[WebSecurityConfig] Spring Security 설정 완료");
 		log.error("*********************************************************************");

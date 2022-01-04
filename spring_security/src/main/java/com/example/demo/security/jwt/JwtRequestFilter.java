@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.example.demo.model.dto.AdminDTO;
@@ -26,8 +27,11 @@ import io.jsonwebtoken.ExpiredJwtException;
  * @Author      장대혁
  * @Developer   장대혁
  * @Date        2022-01-04
- * @Description 
+ * @Description JWT을 검증하는 filter
+ *              OncePerRequestFilter를 상속해 요청당 한번의 filter를 수행한다.
+ *              EXCLUDE_URL에 있는 url은 체크하지 않는다.
  */
+@Component
 public class JwtRequestFilter extends OncePerRequestFilter {
 	
 	@Autowired private AdminService adminService;
@@ -37,8 +41,14 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	private static final List<String> EXCLUDE_URL =
 		Collections.unmodifiableList(
 			Arrays.asList(
+				"/static/**",
+				"/favicon.ico",
 				"/admin",
-				"/authenticate"
+				"/admin/authentication",
+				"/admin/join",
+				"/admin/join/**",
+				"/admin/loginView",
+				"/admin/login"
 			));
 	
 	@Override
@@ -69,16 +79,20 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-
+			
 			if(jwtTokenUtil.validateToken(jwtToken, adminDTO)) {
 				UsernamePasswordAuthenticationToken authenticationToken =
 						new UsernamePasswordAuthenticationToken(adminDTO, null ,adminDTO.getAuthorities());
-
+				
 				authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 				SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 			}
 		}
 		filterChain.doFilter(request,response);
 	}
-
+	
+	@Override
+	protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+		return EXCLUDE_URL.stream().anyMatch(exclude -> exclude.equalsIgnoreCase(request.getServletPath()));
+	}
 }
