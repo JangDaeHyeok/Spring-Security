@@ -15,7 +15,7 @@ public class TestAdminLoginViewController {
 	
 	@RequestMapping(value="admin/login")
 	public ModelAndView TestAdminLogin() {
-		ModelAndView mv = new ModelAndView("admin/login");
+		ModelAndView mv = new ModelAndView("admin/jwtLogin");
 		return mv;
 	}
 	

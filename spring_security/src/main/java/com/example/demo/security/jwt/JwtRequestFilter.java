@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -57,13 +58,20 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
-		final String requestTokenHeader = request.getHeader("Authorization");
+		// jwt local storage 사용 시
+		// final String token = request.getHeader("Authorization");
+		// jwt cookie 사용 시
+		String token = Arrays.stream(request.getCookies())
+				.filter(c -> c.getName().equals("jdhToken"))
+				.findFirst() .map(Cookie::getValue)
+				.orElse(null);
 		
 		String adminId = null;
 		String jwtToken = null;
 		
-		if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
-			jwtToken = requestTokenHeader.substring(7);
+		// Bearer token인 경우
+		if (token != null && token.startsWith("Bearer ")) {
+			jwtToken = token.substring(7);
 			try {
 				adminId = jwtTokenUtil.getUsernameFromToken(jwtToken);
 			} catch (IllegalArgumentException e) {
@@ -75,6 +83,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 			logger.warn("JWT Token does not begin with Bearer String");
 		}
 		
+		// token 검증이 되고 인증 정보가 존재하지 않는 경우 spring security 인증 정보 저장
 		if(adminId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 			AdminDTO adminDTO = new AdminDTO();
 			try {

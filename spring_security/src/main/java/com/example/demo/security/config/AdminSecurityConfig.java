@@ -99,7 +99,7 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
 		*/
 		
 		// jwt 사용을 위한 세션 비활성화
-		http.csrf().disable().authorizeRequests()
+		http.csrf().disable().antMatcher("/admin/**").authorizeRequests()
 		// 리로스 항목 제외
 		.antMatchers("/static/**").permitAll()
 		.antMatchers("/favicon.ico").permitAll()
@@ -119,10 +119,10 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
 		// Spring Security에서 session을 생성하거나 사용하지 않도록 설정
 		.and()
 		.sessionManagement()
-		.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-		
+		.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 		// jwt filter 적용
-		http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+		.and()
+		.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 		
 		log.error("[WebSecurityConfig] Spring Security 설정 완료");
 		log.error("*********************************************************************");
@@ -132,6 +132,8 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
 	 * customLoginSuccessHandler를 CustomAuthenticationFilter의 인증 성공 핸들러로 추가
 	 * 로그인 성공 시 /admin/login 로그인 url을 체크하고 인증 토큰 발급 
 	 */
+	/*
+	 * session 사용 시 provider 의존성 설정
 	@Bean
 	public AdminCustomAuthenticationFilter adminCustomAuthenticationFilter() throws Exception {
 		AdminCustomAuthenticationFilter customAuthenticationFilter = new AdminCustomAuthenticationFilter(authenticationManager());
@@ -163,4 +165,5 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
 	public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) {
 		authenticationManagerBuilder.authenticationProvider(adminCustomAuthenticationProvider());
 	}
+	*/
 }

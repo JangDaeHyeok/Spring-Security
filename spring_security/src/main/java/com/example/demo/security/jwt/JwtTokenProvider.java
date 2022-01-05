@@ -33,7 +33,8 @@ public class JwtTokenProvider {
 	
 	private static final String secret = "jangdaehyeok";
 	
-	public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
+	// 1시간 단위
+	public static final long JWT_TOKEN_VALIDITY = 1000 * 60 * 60;
 	
 	// token으로 사용자 id 조회
 	public String getUsernameFromToken(String token) {
@@ -74,13 +75,13 @@ public class JwtTokenProvider {
 		return doGenerateToken(id, claims);
 	}
 	
-	// jwt 토큰 생성
+	// jwt 토큰 생성(유효기간 2시간)
 	private String doGenerateToken(String id, Map<String, Object> claims) {
 		return Jwts.builder()
 				.setClaims(claims)
 				.setId(id)
 				.setIssuedAt(new Date(System.currentTimeMillis()))
-				.setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
+				.setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 2))
 				.signWith(SignatureAlgorithm.HS512, secret)
 				.compact();
 	}
