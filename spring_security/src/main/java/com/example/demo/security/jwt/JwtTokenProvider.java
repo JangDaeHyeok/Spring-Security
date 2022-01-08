@@ -34,7 +34,9 @@ public class JwtTokenProvider {
 	private static final String secret = "jangdaehyeok";
 	
 	// 1시간 단위
-	public static final long JWT_TOKEN_VALIDITY = 1000 * 60 * 60;
+	// public static final long JWT_TOKEN_VALIDITY = 1000 * 60 * 60;
+	// 1분 단위
+	public static final long JWT_TOKEN_VALIDITY = 1000 * 60;
 	
 	// token으로 사용자 id 조회
 	public String getUsernameFromToken(String token) {
@@ -66,24 +68,60 @@ public class JwtTokenProvider {
 	}
 	
 	// id를 입력받아 토근 생성
-	public String generateToken(String id) {
-		return generateToken(id, new HashMap<>());
+	public String generateAccessToken(String id) {
+		return generateAccessToken(id, new HashMap<>());
 	}
 	
 	// id, 속성정보를 이용해 토근 생성
-	public String generateToken(String id, Map<String, Object> claims) {
-		return doGenerateToken(id, claims);
+	public String generateAccessToken(String id, Map<String, Object> claims) {
+		return doGenerateAccessToken(id, claims);
 	}
 	
-	// jwt 토큰 생성(유효기간 2시간)
-	private String doGenerateToken(String id, Map<String, Object> claims) {
-		return Jwts.builder()
+	// JWT accessToken 생성
+	private String doGenerateAccessToken(String id, Map<String, Object> claims) {
+		String accessToken = Jwts.builder()
 				.setClaims(claims)
 				.setId(id)
 				.setIssuedAt(new Date(System.currentTimeMillis()))
-				.setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 2))
+				.setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1))// 1시간
 				.signWith(SignatureAlgorithm.HS512, secret)
 				.compact();
+		
+		return accessToken;
+	}
+	
+	// id를 입력받아 토근 생성
+	public Map<String, String> generateTokenSet(String id) {
+		return generateTokenSet(id, new HashMap<>());
+	}
+	
+	// id, 속성정보를 이용해 토근 생성
+	public Map<String, String> generateTokenSet(String id, Map<String, Object> claims) {
+		return doGenerateTokenSet(id, claims);
+	}
+	
+	// JWT accessToken, refreshToken 생성
+	private Map<String, String> doGenerateTokenSet(String id, Map<String, Object> claims) {
+		Map<String, String> tokens = new HashMap<String, String>();
+		
+		String accessToken = Jwts.builder()
+				.setClaims(claims)
+				.setId(id)
+				.setIssuedAt(new Date(System.currentTimeMillis()))
+				.setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1))// 1시간
+				.signWith(SignatureAlgorithm.HS512, secret)
+				.compact();
+		
+		String refreshToken = Jwts.builder()
+				.setId(id)
+				.setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 5)) // 5시간
+				.setIssuedAt(new Date(System.currentTimeMillis()))
+				.signWith(SignatureAlgorithm.HS512, secret)
+				.compact();
+		
+		tokens.put("accessToken", accessToken);
+		tokens.put("refreshToken", refreshToken);
+		return tokens;
 	}
 	
 	// 토근 검증

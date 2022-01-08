@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.model.dao.RefreshTokenMapper">
+	<select id="selectRefreshToken" parameterType="com.example.demo.model.dto.RefreshTokenDTO" resultType="com.example.demo.model.dto.RefreshTokenDTO">
+		select
+			adm_refresh_token_idx
+			, adm_idx
+			, refresh_token
+			, reg_dt
+		from
+			nm_adm_refresh_token_tb
+		<where>
+			<if test="admRefreshTokenIdx != null and admRefreshTokenIdx != ''"> and adm_refresh_token_idx = #{admRefreshTokenIdx} </if>
+			<if test="admIdx != null and admIdx != ''"> and adm_idx = #{admIdx} </if>
+		</where>
+	</select>
+	
+	<select id="selectRefreshTokenCount" parameterType="com.example.demo.model.dto.RefreshTokenDTO" resultType="int">
+		select
+			count(*)
+		from
+			nm_adm_refresh_token_tb
+		<where>
+			<if test="admRefreshTokenIdx != null and admRefreshTokenIdx != ''"> and adm_refresh_token_idx = #{admRefreshTokenIdx} </if>
+			<if test="admIdx != null and admIdx != ''"> and adm_idx = #{admIdx} </if>
+		</where>
+	</select>
+	
+	<insert id="insertRefreshToken" parameterType="com.example.demo.model.dto.RefreshTokenDTO">
+		insert nm_adm_refresh_token_tb
+			(adm_idx, refresh_token, reg_dt)
+		values
+			(#{admIdx}, #{refreshToken}, now())
+	</insert>
+	
+	<update id="updateRefreshToken" parameterType="com.example.demo.model.dto.RefreshTokenDTO">
+		update nm_adm_refresh_token_tb set
+			refresh_token = #{refreshToken}
+			, mod_dt = now()
+		<where>
+			<if test="admRefreshTokenIdx != null and admRefreshTokenIdx != ''"> and adm_refresh_token_idx = #{admRefreshTokenIdx} </if>
+			<if test="admIdx != null and admIdx != ''"> and adm_idx = #{admIdx} </if>
+		</where>
+	</update>
+	
+	<delete id="deleteRefreshToken" parameterType="String">
+		delete from nm_adm_refresh_token_tb
+		where
+			adm_refresh_token_idx = #{admRefreshTokenIdx}
+	</delete>
+</mapper>

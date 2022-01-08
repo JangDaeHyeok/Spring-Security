@@ -26,7 +26,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint  {
 	@Override
 	public void commence(HttpServletRequest request, HttpServletResponse response,
 			AuthenticationException authException) throws IOException, ServletException {
-		log.info("[JwtAuthenticationEntryPoint] 토큰 정보가 존재하지 않습니다.");
+		log.info("[JwtAuthenticationEntryPoint] 토큰 정보가 만료되었거나 존재하지 않습니다.");
 		response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "UnAuthorized");
 	}
 

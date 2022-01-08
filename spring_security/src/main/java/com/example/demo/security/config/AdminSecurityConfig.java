@@ -107,6 +107,7 @@ public class AdminSecurityConfig extends WebSecurityConfigurerAdapter {
 		// 관리자 권한 항목
 		.antMatchers("/admin").permitAll()
 		.antMatchers("/admin/authentication").permitAll()
+		.antMatchers("/admin/refresh").permitAll()
 		.antMatchers("/admin/join").permitAll()
 		.antMatchers("/admin/join/**").permitAll()
 		.antMatchers("/admin/loginView").permitAll()

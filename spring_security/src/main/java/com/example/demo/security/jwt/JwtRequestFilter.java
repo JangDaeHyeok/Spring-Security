@@ -24,6 +24,9 @@ import com.example.demo.model.dto.AdminDTO;
 import com.example.demo.model.service.AdminService;
 
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 
 /**
  * @Title       JWT Request Filter
@@ -49,6 +52,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 				"/favicon.ico",
 				"/admin",
 				"/admin/authentication",
+				"/admin/refresh",
 				"/admin/join",
 				"/admin/join/**",
 				"/admin/loginView",
@@ -60,6 +64,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 		// jwt local storage 사용 시
 		// final String token = request.getHeader("Authorization");
+		
 		// jwt cookie 사용 시
 		String token = Arrays.stream(request.getCookies())
 				.filter(c -> c.getName().equals("jdhToken"))
@@ -74,10 +79,16 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 			jwtToken = token.substring(7);
 			try {
 				adminId = jwtTokenUtil.getUsernameFromToken(jwtToken);
-			} catch (IllegalArgumentException e) {
-				log.error("Unable to get JWT Token");
+			} catch (SignatureException e) {
+				log.error("Invalid JWT signature: {}", e.getMessage());
+			} catch (MalformedJwtException e) {
+				log.error("Invalid JWT token: {}", e.getMessage());
 			} catch (ExpiredJwtException e) {
-				log.error("JWT Token has expired");
+				log.error("JWT token is expired: {}", e.getMessage());
+			} catch (UnsupportedJwtException e) {
+				log.error("JWT token is unsupported: {}", e.getMessage());
+			} catch (IllegalArgumentException e) {
+				log.error("JWT claims string is empty: {}", e.getMessage());
 			}
 		} else {
 			logger.warn("JWT Token does not begin with Bearer String");
