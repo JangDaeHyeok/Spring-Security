@@ -10,6 +10,6 @@
  - 사용자 정보 인증 시 JWT accessToken, refreshToken 발급 -> accessToken 쿠키 저장 -> refreshToken DB 저장
  - 요청 시 쿠키에 저장된 JWT accessToken 체크
  - accessToken이 인증 완료된 경우 비즈니스 로직 진행
- - accessToken이 인증 완료되고 refreshToken이 만료된 경우 refreshToken 재발급(예정)
+ - accessToken이 인증 완료되고 refreshToken이 만료된 경우 refreshToken 재발급
  - accessToken이 만료된 경우 DB에 저장된 refreshToken을 체크 후 accessToken 재발급
  - refreshToken이 만료된 경우 result : fail 리턴
