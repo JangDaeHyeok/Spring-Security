@@ -42,7 +42,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 	private final Logger log = LoggerFactory.getLogger(this.getClass());
 	
 	@Autowired private AdminService adminService;
-	@Autowired private JwtTokenProvider jwtTokenUtil;
+	@Autowired private JwtTokenProvider jwtTokenProvider;
 	
 	// 포함하지 않을 url
 	private static final List<String> EXCLUDE_URL =
@@ -78,7 +78,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 		if (token != null && token.startsWith("Bearer ")) {
 			jwtToken = token.substring(7);
 			try {
-				adminId = jwtTokenUtil.getUsernameFromToken(jwtToken);
+				adminId = jwtTokenProvider.getUsernameFromToken(jwtToken);
 			} catch (SignatureException e) {
 				log.error("Invalid JWT signature: {}", e.getMessage());
 			} catch (MalformedJwtException e) {
@@ -103,7 +103,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 				e.printStackTrace();
 			}
 			
-			if(jwtTokenUtil.validateToken(jwtToken, adminDTO)) {
+			if(jwtTokenProvider.validateToken(jwtToken, adminDTO)) {
 				UsernamePasswordAuthenticationToken authenticationToken =
 						new UsernamePasswordAuthenticationToken(adminDTO, null ,adminDTO.getAuthorities());
 				
@@ -111,6 +111,16 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 				SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 			}
 		}
+		
+		// accessToken 인증이 되었다면 refreshToken 재발급이 필요한 경우 재발급
+		try {
+			if(adminId != null) {
+				jwtTokenProvider.reGenerateRefreshToken(adminId);
+			}
+		}catch (Exception e) {
+			log.error("[JwtRequestFilter] refreshToken 재발급 체크 중 문제 발생 : {}", e.getMessage());
+		}
+		
 		filterChain.doFilter(request,response);
 	}
 	

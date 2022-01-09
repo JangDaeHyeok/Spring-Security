@@ -7,9 +7,13 @@ import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.example.demo.model.dto.AdminDTO;
+import com.example.demo.model.dto.RefreshTokenDTO;
+import com.example.demo.model.service.AdminService;
+import com.example.demo.model.service.RefreshTokenService;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -33,10 +37,11 @@ public class JwtTokenProvider {
 	
 	private static final String secret = "jangdaehyeok";
 	
+	@Autowired AdminService adminService;
+	@Autowired RefreshTokenService refreshTokenService;
+	
 	// 1시간 단위
-	// public static final long JWT_TOKEN_VALIDITY = 1000 * 60 * 60;
-	// 1분 단위
-	public static final long JWT_TOKEN_VALIDITY = 1000 * 60;
+	public static final long JWT_TOKEN_VALIDITY = 1000 * 60 * 60;
 	
 	// token으로 사용자 id 조회
 	public String getUsernameFromToken(String token) {
@@ -67,12 +72,12 @@ public class JwtTokenProvider {
 		return getClaimFromToken(token, Claims::getExpiration);
 	}
 	
-	// id를 입력받아 토근 생성
+	// id를 입력받아 accessToken 생성
 	public String generateAccessToken(String id) {
 		return generateAccessToken(id, new HashMap<>());
 	}
 	
-	// id, 속성정보를 이용해 토근 생성
+	// id, 속성정보를 이용해 accessToken 생성
 	public String generateAccessToken(String id, Map<String, Object> claims) {
 		return doGenerateAccessToken(id, claims);
 	}
@@ -90,12 +95,29 @@ public class JwtTokenProvider {
 		return accessToken;
 	}
 	
-	// id를 입력받아 토근 생성
+	// id를 입력받아 accessToken 생성
+	public String generateRefreshToken(String id) {
+		return doGenerateRefreshToken(id);
+	}
+	
+	// JWT accessToken 생성
+	private String doGenerateRefreshToken(String id) {
+		String refreshToken = Jwts.builder()
+				.setId(id)
+				.setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 5)) // 5시간
+				.setIssuedAt(new Date(System.currentTimeMillis()))
+				.signWith(SignatureAlgorithm.HS512, secret)
+				.compact();
+		
+		return refreshToken;
+	}
+	
+	// id를 입력받아 accessToken, refreshToken 생성
 	public Map<String, String> generateTokenSet(String id) {
 		return generateTokenSet(id, new HashMap<>());
 	}
 	
-	// id, 속성정보를 이용해 토근 생성
+	// id, 속성정보를 이용해 accessToken, refreshToken 생성
 	public Map<String, String> generateTokenSet(String id, Map<String, Object> claims) {
 		return doGenerateTokenSet(id, claims);
 	}
@@ -122,6 +144,45 @@ public class JwtTokenProvider {
 		tokens.put("accessToken", accessToken);
 		tokens.put("refreshToken", refreshToken);
 		return tokens;
+	}
+	
+	// JWT refreshToken 만료체크 후 재발급
+	public Boolean reGenerateRefreshToken(String id) throws Exception {
+		log.info("[reGenerateRefreshToken] refreshToken 재발급 요청");
+		// 관리자 정보 조회
+		AdminDTO aDTO = new AdminDTO();
+		aDTO = adminService.loadAdminByAdminId(id);
+		
+		// refreshToken 체크
+		RefreshTokenDTO rDTO = new RefreshTokenDTO();
+		rDTO.setAdmIdx(aDTO.getAdmIdx());
+		rDTO = refreshTokenService.getRefreshToken(rDTO);
+		
+		// refreshToken 정보가 존재하지 않는 경우
+		if(rDTO == null) {
+			log.info("[reGenerateRefreshToken] refreshToken 정보가 존재하지 않습니다.");
+			return false;
+		}
+		
+		// refreshToken 만료 여부 체크
+		try {
+			String refreshToken = rDTO.getRefreshToken().substring(7);
+			Jwts.parser().setSigningKey(secret).parseClaimsJws(refreshToken);
+			log.info("[reGenerateRefreshToken] refreshToken이 만료되지 않았습니다.");
+			return true;
+		}
+		// refreshToken이 만료된 경우 재발급
+		catch(ExpiredJwtException e) {
+			rDTO.setRefreshToken("Bearer " + generateRefreshToken(id));
+			refreshTokenService.editRefreshToken(rDTO);
+			log.info("[reGenerateRefreshToken] refreshToken 재발급 완료 : {}", "Bearer " + generateRefreshToken(id));
+			return true;
+		}
+		// 그 외 예외처리
+		catch(Exception e) {
+			log.error("[reGenerateRefreshToken] refreshToken 재발급 중 문제 발생 : {}", e.getMessage());
+			return false;
+		}
 	}
 	
 	// 토근 검증

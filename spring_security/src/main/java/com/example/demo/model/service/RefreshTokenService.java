@@ -32,6 +32,10 @@ public class RefreshTokenService {
 		}
 	}
 	
+	public int editRefreshToken(RefreshTokenDTO refreshTokenDTO) throws Exception {
+		return refreshTokenMapper.updateRefreshToken(refreshTokenDTO);
+	}
+	
 	public int delRefreshToken(String adminRefreshTokenIdx) throws Exception {
 		return refreshTokenMapper.deleteRefreshToken(adminRefreshTokenIdx);
 	}
