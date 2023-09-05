@@ -13,3 +13,6 @@
  - accessToken이 인증 완료되고 refreshToken이 만료된 경우 refreshToken 재발급
  - accessToken이 만료된 경우 DB에 저장된 refreshToken을 체크 후 accessToken 재발급
  - refreshToken이 만료된 경우 result : fail 리턴
+
+## 🔗 참조
+https://jangjjolkit.tistory.com/category/Spring%20Framework/Spring%20Security
